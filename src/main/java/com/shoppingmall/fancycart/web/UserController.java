@@ -1,6 +1,7 @@
 package com.shoppingmall.fancycart.web;
 
-import org.springframework.security.core.Authentication;
+import com.shoppingmall.fancycart.config.auth.LoginUser;
+import com.shoppingmall.fancycart.config.auth.dto.SessionUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,9 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class UserController {
 
     @GetMapping("/api/v1/profiles")
-    public String getProfileView(Model model, Authentication authentication) {
-        if(authentication != null) {
-            model.addAttribute("userName", authentication.getName());
+    public String getProfileView(Model model, @LoginUser SessionUser user) {
+
+        if(user != null) {
+            model.addAttribute("user", user);
         }
 
         return "me/profiles";

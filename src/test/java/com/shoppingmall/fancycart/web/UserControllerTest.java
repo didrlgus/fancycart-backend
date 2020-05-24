@@ -1,9 +1,5 @@
 package com.shoppingmall.fancycart.web;
 
-import com.shoppingmall.fancycart.config.auth.CustomUserDetailsService;
-import com.shoppingmall.fancycart.config.auth.dto.UserPrincipal;
-import com.shoppingmall.fancycart.domain.user.Role;
-import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +26,6 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext context;
-    @Autowired
-    private UserRepository userRepository;
 
     @Before
     public void setup() {
