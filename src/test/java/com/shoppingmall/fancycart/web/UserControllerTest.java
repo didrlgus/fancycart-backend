@@ -1,5 +1,7 @@
 package com.shoppingmall.fancycart.web;
 
+import com.shoppingmall.fancycart.auth.AuthUtils;
+import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
 import org.junit.Before;
 import org.junit.Test;
@@ -7,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
@@ -26,24 +29,17 @@ public class UserControllerTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext context;
-
+    @Autowired
+    private AuthUtils authUtils;
     @Before
     public void setup() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
+        authUtils.authenticate();
     }
 
-    // 프로필 화면 조회 테스트
-    @WithMockUser(roles = "USER")
-    @Test
-    public void getProfileView() throws Exception {
-        mockMvc.perform(get("/api/v1/profiles"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("me/profiles"))
-                .andExpect(authenticated());
-    }
     // 로그 아웃 테스트
     @WithMockUser(roles = "USER")
     @Test
