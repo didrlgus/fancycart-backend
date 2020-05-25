@@ -2,10 +2,9 @@ package com.shoppingmall.fancycart.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shoppingmall.fancycart.auth.AuthUtils;
-import com.shoppingmall.fancycart.config.auth.CustomUserDetailsService;
-import com.shoppingmall.fancycart.domain.user.Role;
 import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
+import com.shoppingmall.fancycart.exception.ExceptionUtils;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
 import org.junit.Before;
@@ -17,7 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
 import static com.shoppingmall.fancycart.auth.AuthUtils.*;
@@ -68,7 +66,8 @@ public class UserApiControllerTest {
     public void updateProfile() throws Exception {
         User user = authUtils.getAuthenticatedUser();
 
-        UserProfileRequestDto userProfileRequestDto = new UserProfileRequestDto(ROAD_ADDR, BUILDING_NAME, DETAIL_ADDR);
+        UserProfileRequestDto userProfileRequestDto
+                = new UserProfileRequestDto(ROAD_ADDR, BUILDING_NAME, DETAIL_ADDR, AGREE_MESSAGE_BY_EMAIL);
 
         mockMvc.perform(put("/api/v1/profiles/" + user.getId())
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -81,5 +80,27 @@ public class UserApiControllerTest {
         assertEquals(modifiedUser.getRoadAddr(), ROAD_ADDR);
         assertEquals(modifiedUser.getBuildingName(), BUILDING_NAME);
         assertEquals(modifiedUser.getDetailAddr(), DETAIL_ADDR);
+    }
+    // 프로필 업데이트 유효성 테스트
+    @Test
+    public void updateProfileValidCheck() throws Exception {
+        User user = authUtils.getAuthenticatedUser();
+        UserProfileRequestDto userProfileRequestDto
+                = new UserProfileRequestDto("", BUILDING_NAME, DETAIL_ADDR, AGREE_MESSAGE_BY_EMAIL);
+
+        mockMvc.perform(put("/api/v1/profiles/" + user.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(new ObjectMapper().writeValueAsString(userProfileRequestDto)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(ExceptionUtils.INPUT_EXCEPTION_MESSAGE));
+    }
+
+    // 존재하지 않는 유저 요청 테스트
+    @Test
+    public void notExistUserTest() throws Exception {
+        mockMvc.perform(get("/api/v1/profiles/" + 0)
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().string(ExceptionUtils.NO_EXIST_USER_MESSAGE));
     }
 }

@@ -5,7 +5,10 @@ import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RequiredArgsConstructor
 @RestController
@@ -18,10 +21,14 @@ public class UserApiController {
         return ResponseEntity.ok(userService.getProfile(id));
     }
 
-    // TODO. requestdto 유효성 검사
     @PutMapping("/api/v1/profiles/{id}")
-    public ResponseEntity<Long> updateProfile(@PathVariable Long id,
-                                              @RequestBody UserProfileRequestDto userProfileRequestDto) {
+    public ResponseEntity<?> updateProfile(@PathVariable Long id,
+                                              @Valid @RequestBody UserProfileRequestDto userProfileRequestDto,
+                                              Errors errors) {
+        if(errors.hasErrors()) {
+            return ResponseEntity.badRequest().body("입력값이 유효하지 않습니다.");
+        }
+
         return ResponseEntity.ok(userService.updateProfile(id,userProfileRequestDto));
     }
 }

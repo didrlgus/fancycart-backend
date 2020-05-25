@@ -1,27 +1,30 @@
 package com.shoppingmall.fancycart.web.dto;
 
-import com.shoppingmall.fancycart.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.NotBlank;
 
 @Getter
 public class UserProfileRequestDto {
+    @NotBlank
+    @Length(max = 50)
     private String roadAddr;
+    @NotBlank
+    @Length(max = 50)
     private String buildingName;
+    @NotBlank
+    @Length(max = 50)
     private String detailAddr;
+    private boolean agreeMessageByEmail;
 
     @Builder
-    public UserProfileRequestDto(String roadAddr, String buildingName, String detailAddr) {
+    public UserProfileRequestDto(String roadAddr, String buildingName,
+                                 String detailAddr, boolean agreeMessageByEmail) {
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
         this.detailAddr = detailAddr;
-    }
-
-    public User toEntity() {
-        return User.builder()
-                .roadAddr(roadAddr)
-                .buildingName(buildingName)
-                .detailAddr(detailAddr)
-                .build();
+        this.agreeMessageByEmail = agreeMessageByEmail;
     }
 }

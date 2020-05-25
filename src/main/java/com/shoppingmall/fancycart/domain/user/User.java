@@ -26,7 +26,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column
@@ -41,13 +41,16 @@ public class User extends BaseTimeEntity {
     @Column
     private String detailAddr;
 
+    @Column
+    private boolean agreeMessageByEmail;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     @Builder
     public User(String name, String email, String picture, Role role,
-                String roadAddr, String buildingName, String detailAddr) {
+                String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail) {
         this.name = name;
         this.email = email;
         this.picture = picture;
@@ -55,6 +58,7 @@ public class User extends BaseTimeEntity {
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
         this. detailAddr = detailAddr;
+        this.agreeMessageByEmail = agreeMessageByEmail;
     }
 
     public User update(String name, String picture) {
@@ -64,10 +68,12 @@ public class User extends BaseTimeEntity {
         return this;
     }
 
-    public User update(String roadAddr, String buildingName, String detailAddr) {
+    public User update(String roadAddr, String buildingName,
+                       String detailAddr, boolean agreeMessageByEmail) {
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
         this. detailAddr = detailAddr;
+        this.agreeMessageByEmail = agreeMessageByEmail;
 
         return this;
     }

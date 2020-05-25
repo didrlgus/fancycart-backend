@@ -26,6 +26,7 @@ public class AuthUtils {
     public static final String DETAIL_ADDR = "508동 201호";
     public static final String AUTH_EMAIL = "rlgusdid@naver.com";
     public static final String NAME = "양기현";
+    public static final boolean AGREE_MESSAGE_BY_EMAIL = true;
 
     public void authenticate() {
         saveUser();

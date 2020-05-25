@@ -12,6 +12,7 @@ public class UserProfileResponseDto {
     private String roadAddr;
     private String buildingName;
     private String detailAddr;
+    private boolean agreeMessageByEmail;
 
     public UserProfileResponseDto(User entity) {
         this.id = entity.getId();
@@ -21,5 +22,6 @@ public class UserProfileResponseDto {
         this.roadAddr = entity.getRoadAddr();
         this.buildingName = entity.getBuildingName();
         this.detailAddr = entity.getDetailAddr();
+        this.agreeMessageByEmail = entity.isAgreeMessageByEmail();
     }
 }

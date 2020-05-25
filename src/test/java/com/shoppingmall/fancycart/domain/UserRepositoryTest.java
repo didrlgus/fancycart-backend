@@ -58,21 +58,6 @@ public class UserRepositoryTest {
         assertEquals(user.getEmail(), AUTH_EMAIL);
     }
 
-    // 유저 정보 변경 테스트
-    @Test
-    public void updateUserTest() {
-        User user = findUser();
-        user = user.update(ROAD_ADDR, BUILDING_NAME, DETAIL_ADDR);
-
-        userRepository.save(user);
-
-        User modifiedUser = findUser();
-
-        assertEquals(modifiedUser.getRoadAddr(), ROAD_ADDR);
-        assertEquals(modifiedUser.getBuildingName(), BUILDING_NAME);
-        assertEquals(modifiedUser.getDetailAddr(), DETAIL_ADDR);
-    }
-
     private User findUser() {
         Optional<User> user = userRepository.findByEmail(AUTH_EMAIL);
         user.orElseThrow(NoSuchElementException::new);
