@@ -26,27 +26,54 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column
     private String picture;
+
+    @Column
+    private String roadAddr;
+
+    @Column
+    private String buildingName;
+
+    @Column
+    private String detailAddr;
+
+    @Column
+    private boolean agreeMessageByEmail;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
 
     @Builder
-    public User(String name, String email, String picture, Role role) {
+    public User(String name, String email, String picture, Role role,
+                String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail) {
         this.name = name;
         this.email = email;
         this.picture = picture;
         this.role = role;
+        this.roadAddr = roadAddr;
+        this.buildingName = buildingName;
+        this. detailAddr = detailAddr;
+        this.agreeMessageByEmail = agreeMessageByEmail;
     }
 
     public User update(String name, String picture) {
         this.name = name;
         this.picture = picture;
+
+        return this;
+    }
+
+    public User update(String roadAddr, String buildingName,
+                       String detailAddr, boolean agreeMessageByEmail) {
+        this.roadAddr = roadAddr;
+        this.buildingName = buildingName;
+        this. detailAddr = detailAddr;
+        this.agreeMessageByEmail = agreeMessageByEmail;
 
         return this;
     }
