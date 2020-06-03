@@ -1,7 +1,6 @@
 package com.shoppingmall.fancycart.domain;
 
 import com.shoppingmall.fancycart.auth.AuthUtils;
-import com.shoppingmall.fancycart.config.auth.CustomUserDetailsService;
 import com.shoppingmall.fancycart.config.auth.dto.UserPrincipal;
 import com.shoppingmall.fancycart.domain.user.Role;
 import com.shoppingmall.fancycart.domain.user.User;
@@ -11,10 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.NoSuchElementException;
