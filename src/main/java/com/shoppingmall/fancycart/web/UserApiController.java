@@ -1,6 +1,7 @@
 package com.shoppingmall.fancycart.web;
 
 import com.shoppingmall.fancycart.service.UserService;
+import com.shoppingmall.fancycart.utils.ApiUtils;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -11,17 +12,18 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RequiredArgsConstructor
+@RequestMapping(ApiUtils.API_VERSION)
 @RestController
 public class UserApiController {
 
     private final UserService userService;
 
-    @GetMapping("/api/v1/profiles/{id}")
+    @GetMapping("/profiles/{id}")
     public ResponseEntity<UserProfileResponseDto> getProfile(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getProfile(id));
     }
 
-    @PutMapping("/api/v1/profiles/{id}")
+    @PutMapping("/profiles/{id}")
     public ResponseEntity<?> updateProfile(@PathVariable Long id,
                                               @Valid @RequestBody UserProfileRequestDto userProfileRequestDto,
                                               Errors errors) {
