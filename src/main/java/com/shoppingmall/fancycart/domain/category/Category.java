@@ -19,7 +19,7 @@ public class Category extends BaseTimeEntity {
     @Column(length = 10)
     private String catCd;
 
-    @Column(length = 50)
+    @Column(length = 50, unique = true)
     private String catNm;
 
     @Column(length = 10)

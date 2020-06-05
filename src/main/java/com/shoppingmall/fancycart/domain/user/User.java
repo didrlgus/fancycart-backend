@@ -45,6 +45,9 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Tag> tags = new HashSet<>();
+
     @Builder
     public User(String name, String email, String picture, Role role,
                 String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail) {

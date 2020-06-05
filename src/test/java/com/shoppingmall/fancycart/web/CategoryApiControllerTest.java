@@ -3,11 +3,13 @@ package com.shoppingmall.fancycart.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shoppingmall.fancycart.domain.category.Category;
 import com.shoppingmall.fancycart.domain.category.CategoryRepository;
+import com.shoppingmall.fancycart.domain.tag.TagRepository;
 import com.shoppingmall.fancycart.service.CategoryService;
 import com.shoppingmall.fancycart.utils.ApiUtils;
 import com.shoppingmall.fancycart.web.dto.CategoryRequestDto;
 import com.shoppingmall.fancycart.web.dto.CategoryResponseDto;
 import com.shoppingmall.fancycart.web.dto.CategoryUpdateRequestDto;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +45,8 @@ public class CategoryApiControllerTest {
     private CategoryService categoryService;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private TagRepository tagRepository;
 
     @Before
     public void setup() {
@@ -50,6 +54,12 @@ public class CategoryApiControllerTest {
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
+    }
+
+    @After
+    public void after() {
+        categoryRepository.deleteAll();
+        tagRepository.deleteAll();
     }
 
     // 카테고리 조회 테스트
@@ -101,6 +111,19 @@ public class CategoryApiControllerTest {
         assertEquals(category.getCatLv().intValue(), LOWER_CAT_LV);
         assertEquals(category.getCatCd(), "C001001");
         assertNotNull(category.getUpprCatCd());
+    }
+
+    // 카테고리 중복 유효성 검사 테스트
+    @WithMockUser(roles = "ADMIN")
+    @Test
+    public void categoryDuplicateTest() throws Exception {
+        CategoryRequestDto categoryRequestDto = getLowerCategoryRequestDto();
+        callAddCategoryAPI(categoryRequestDto);
+
+        mockMvc.perform(post(API_VERSION + "/category")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(new ObjectMapper().writeValueAsString(categoryRequestDto)))
+                .andExpect(status().is4xxClientError());
     }
 
     // 카테고리 업데이트 테스트

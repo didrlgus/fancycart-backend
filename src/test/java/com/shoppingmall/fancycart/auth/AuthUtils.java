@@ -10,11 +10,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
-@Component
+@Transactional
 @RequiredArgsConstructor
+@Component
 public class AuthUtils {
 
     private final UserRepository userRepository;
@@ -28,7 +31,10 @@ public class AuthUtils {
     public static final boolean AGREE_MESSAGE_BY_EMAIL = true;
 
     public void authenticate() {
-        saveUser();
+        Optional<User> userOpt = userRepository.findByEmail(AUTH_EMAIL);
+        if(!userOpt.isPresent()) {
+            saveUser();
+        }
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(AUTH_EMAIL);
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
