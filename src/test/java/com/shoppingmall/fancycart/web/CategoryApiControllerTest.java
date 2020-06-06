@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -37,6 +38,8 @@ public class CategoryApiControllerTest {
     private final String API_VERSION = ApiUtils.API_VERSION;
     private final static int UPPR_CAT_LV = 1;
     private final static int LOWER_CAT_LV = 2;
+    private final static ResultMatcher STATUS_OK = status().isOk();
+    private final static ResultMatcher STATUS_CLIENT_ERROR = status().is4xxClientError();
 
     private MockMvc mockMvc;
     @Autowired
@@ -70,7 +73,7 @@ public class CategoryApiControllerTest {
         List<CategoryResponseDto> categoryResponseDtoList
                 = categoryService.toCategoryResponseDtoList(categoryList);
 
-        callFindCategoryAPI(categoryResponseDtoList);
+        callFindCategoryAPI(categoryResponseDtoList, STATUS_OK);
     }
 
     // 카테고리 추가 권한 테스트
@@ -78,11 +81,7 @@ public class CategoryApiControllerTest {
     @Test
     public void addCategoryAuthorizationTest() throws Exception {
         CategoryRequestDto categoryRequestDto = getUpprCategoryRequestDto();
-
-        mockMvc.perform(post(API_VERSION + "/category")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(new ObjectMapper().writeValueAsString(categoryRequestDto)))
-                .andExpect(status().is4xxClientError());
+        callAddCategoryAPI(categoryRequestDto, STATUS_CLIENT_ERROR);
     }
 
     // 상위 카테고리 추가 테스트
@@ -91,7 +90,8 @@ public class CategoryApiControllerTest {
     public void addUpprCategoryTest() throws Exception {
         CategoryRequestDto categoryRequestDto = getUpprCategoryRequestDto();
 
-        callAddCategoryAPI(categoryRequestDto);
+        callAddCategoryAPI(categoryRequestDto, STATUS_OK);
+
         Category category = getAddedCategory(UPPR_CAT_LV);
 
         assertEquals(category.getCatLv().intValue(), UPPR_CAT_LV);
@@ -105,7 +105,7 @@ public class CategoryApiControllerTest {
     public void addLowerCategoryTest() throws Exception {
         CategoryRequestDto categoryRequestDto = getLowerCategoryRequestDto();
 
-        callAddCategoryAPI(categoryRequestDto);
+        callAddCategoryAPI(categoryRequestDto, STATUS_OK);
         Category category = getAddedCategory(LOWER_CAT_LV);
 
         assertEquals(category.getCatLv().intValue(), LOWER_CAT_LV);
@@ -118,12 +118,8 @@ public class CategoryApiControllerTest {
     @Test
     public void categoryDuplicateTest() throws Exception {
         CategoryRequestDto categoryRequestDto = getLowerCategoryRequestDto();
-        callAddCategoryAPI(categoryRequestDto);
-
-        mockMvc.perform(post(API_VERSION + "/category")
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(new ObjectMapper().writeValueAsString(categoryRequestDto)))
-                .andExpect(status().is4xxClientError());
+        callAddCategoryAPI(categoryRequestDto, STATUS_OK);
+        callAddCategoryAPI(categoryRequestDto, STATUS_CLIENT_ERROR);
     }
 
     // 카테고리 업데이트 테스트
@@ -131,19 +127,12 @@ public class CategoryApiControllerTest {
     @Test
     public void updateCategoryTest() throws Exception {
         CategoryRequestDto categoryRequestDto = getUpprCategoryRequestDto();
-        callAddCategoryAPI(categoryRequestDto);
-
-        CategoryUpdateRequestDto updateRequestDto = CategoryUpdateRequestDto.builder()
-                .catNm("식품")
-                .isAvailable('N')
-                .build();
+        callAddCategoryAPI(categoryRequestDto, STATUS_OK);
 
         Category addedCategory = getAddedCategory(1);
 
-        mockMvc.perform(put(API_VERSION + "/category/" + addedCategory.getId())
-                .contentType(MediaType.APPLICATION_JSON_UTF8)
-                .content(new ObjectMapper().writeValueAsString(updateRequestDto)))
-                .andExpect(status().isOk());
+        CategoryUpdateRequestDto updateRequestDto = getCategoryUpdateRequestDto();
+        callUpdateCategoryAPI(addedCategory, updateRequestDto, STATUS_OK);
 
         Category category = getUpdatedCategory(categoryRequestDto.getCatLv());
 
@@ -157,24 +146,39 @@ public class CategoryApiControllerTest {
         return categoryList.get(0);
     }
 
+    private CategoryUpdateRequestDto getCategoryUpdateRequestDto() {
+        return CategoryUpdateRequestDto.builder()
+                .catNm("식품")
+                .isAvailable('N')
+                .build();
+    }
+
     private Category getAddedCategory(int catLv) {
         List<Category> categoryList = categoryRepository.findByCatLvOrderByCreatedDateDesc(catLv);
 
         return categoryList.get(0);
     }
 
-    private void callFindCategoryAPI(List<CategoryResponseDto> categoryResponseDtoList) throws Exception {
+    private void callFindCategoryAPI(List<CategoryResponseDto> categoryResponseDtoList, ResultMatcher status) throws Exception {
         mockMvc.perform(get(API_VERSION + "/category")
                 .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andExpect(status().isOk())
+                .andExpect(status)
                 .andExpect(content().json(new ObjectMapper().writeValueAsString(categoryResponseDtoList)));
     }
 
-    private void callAddCategoryAPI(CategoryRequestDto categoryRequestDto) throws Exception {
+    private void callAddCategoryAPI(CategoryRequestDto categoryRequestDto, ResultMatcher status) throws Exception {
         mockMvc.perform(post(API_VERSION + "/category")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(categoryRequestDto)))
-                .andExpect(status().isOk());
+                .andExpect(status);
+    }
+
+    private void callUpdateCategoryAPI(Category category, CategoryUpdateRequestDto updateRequestDto,
+                                       ResultMatcher status) throws Exception {
+        mockMvc.perform(put(API_VERSION + "/category/" + category.getId())
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(new ObjectMapper().writeValueAsString(updateRequestDto)))
+                .andExpect(status);
     }
 
     private CategoryRequestDto getLowerCategoryRequestDto() {
