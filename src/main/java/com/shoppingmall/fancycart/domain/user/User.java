@@ -49,8 +49,9 @@ public class User extends BaseTimeEntity {
     private Set<Tag> tags = new HashSet<>();
 
     @Builder
-    public User(String name, String email, String picture, Role role,
+    public User(Long id, String name, String email, String picture, Role role,
                 String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.picture = picture;

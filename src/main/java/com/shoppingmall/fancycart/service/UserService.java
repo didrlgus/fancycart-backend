@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.LimitExceededException;
 import javax.validation.Valid;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -47,7 +46,7 @@ public class UserService {
         Tag tag = tagRepository.findByTitle(tagRequestDto.getTitle());
 
         if(tag == null) {
-            throw new NoSuchElementException("존재하지 않는 태그 입니다.");
+            throw new NoSuchElementException(ExceptionUtils.NO_EXIST_TAG_MESSAGE);
         }
 
         Optional<User> userOpt = userRepository.findById(id);
@@ -56,13 +55,13 @@ public class UserService {
         Set<Tag> tags = user.getTags();
 
         if(tags.size() >= 10) {
-            throw new ExceedTagOfUserException("태그는 10개 까지만 추가할 수 있습니다.");
+            throw new ExceedTagOfUserException(ExceptionUtils.AVAILABLE_TAG_EXCEED_MESSAGE);
         }
 
         boolean ret = tags.stream().anyMatch(t -> t.getTitle().equals(tag.getTitle()));
 
         if(ret) {
-            throw new DuplicatedTagOfUserException("이미 추가 되어있는 태그 입니다.");
+            throw new DuplicatedTagOfUserException(ExceptionUtils.DUPLICATED_TAG_MESSAGE);
         }
 
         userOpt.orElseThrow(NoSuchElementException::new).getTags().add(tag);

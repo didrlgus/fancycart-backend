@@ -59,40 +59,47 @@ public class CategoryService {
     }
 
     private String getLowerCatCd(CategoryRequestDto categoryRequestDto) {
-        String upprCatCd = categoryRequestDto.getUpprCatCd();
+        String upperCatCd = categoryRequestDto.getUpprCatCd();
 
         StringBuilder lowerCatCd = new StringBuilder();
         // ex) C001000 -> C001
-        lowerCatCd.append(upprCatCd, 0, 4);
+        lowerCatCd.append(upperCatCd, 0, 4);
 
-        Long lowerCategoryCount = categoryRepository
-                .countByCatLvAndUpprCatCd(LOWER_CATEGORY_LV, upprCatCd);
+        Long lowerCategoryCount = categoryRepository.countByCatLvAndUpprCatCd(LOWER_CATEGORY_LV, upperCatCd);
         lowerCategoryCount++;
 
-        if(lowerCategoryCount<10) {
-            lowerCatCd.append("00");
-        } else if(lowerCategoryCount<100) {
-            lowerCatCd.append('0');
-        }
-        lowerCatCd.append(lowerCategoryCount);
-
-        return lowerCatCd.toString();
+        return getLowerCatCdFromCatCnt(lowerCatCd, lowerCategoryCount.intValue());
     }
 
     private String getUpperCatCd() {
         Long upperCategoryCount = categoryRepository.countByCatLv(UPPER_CATEGORY_LV);
         upperCategoryCount++;
 
-        StringBuilder upprCatCd = new StringBuilder("C");
+        StringBuilder upperCatCd = new StringBuilder("C");
 
-        if(upperCategoryCount < 10) {
-            upprCatCd.append("00");
-        } else if(upperCategoryCount < 100) {
-            upprCatCd.append('0');
+        return getUpperCatCdFromCatCnt(upperCatCd, upperCategoryCount.intValue());
+    }
+
+    private String getLowerCatCdFromCatCnt(StringBuilder lowerCatCd, int lowerCategoryCount) {
+        // 하위 카테고리 - 1~999까지
+        if(lowerCategoryCount<10) {
+            return lowerCatCd.append("00").append(lowerCategoryCount).toString();
         }
+        if(lowerCategoryCount<100) {
+            return lowerCatCd.append('0').append(lowerCategoryCount).toString();
+        }
+        return lowerCatCd.append(lowerCategoryCount).toString();
+    }
 
-        upprCatCd.append(upperCategoryCount).append("000");
-        return upprCatCd.toString();
+    private String getUpperCatCdFromCatCnt(StringBuilder upprCatCd, int upperCategoryCount) {
+        // 상위 카테고리 - 1~999까지
+        if(upperCategoryCount < 10) {
+            return upprCatCd.append("00").append(upperCategoryCount).append("000").toString();
+        }
+        if(upperCategoryCount < 100) {
+            return upprCatCd.append('0').append(upperCategoryCount).append("000").toString();
+        }
+        return upprCatCd.append(upperCategoryCount).append("000").toString();
     }
 
     public List<CategoryResponseDto> toCategoryResponseDtoList(List<Category> categoryList) {
