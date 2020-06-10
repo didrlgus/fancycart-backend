@@ -54,4 +54,14 @@ public class Category extends BaseTimeEntity {
 
         return this;
     }
+
+    public static void lowerCategoryCdValidCheck(String categoryCd) throws Exception {
+        if(!categoryCd.contains("C")) {
+            throw new Exception();
+        }
+        String str = categoryCd.substring(3);
+        if(Integer.parseInt(str) % 1000 == 0) {
+            throw new Exception();
+        }
+    }
 }

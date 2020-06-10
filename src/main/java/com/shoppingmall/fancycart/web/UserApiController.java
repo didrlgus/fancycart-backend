@@ -29,8 +29,8 @@ public class UserApiController {
 
     @PutMapping("/profiles/{id}")
     public ResponseEntity<?> updateProfile(@PathVariable Long id,
-                                              @Valid @RequestBody UserProfileRequestDto userProfileRequestDto,
-                                              Errors errors) {
+                                           @Valid @RequestBody UserProfileRequestDto userProfileRequestDto,
+                                           Errors errors) {
         if(errors.hasErrors()) {
             return ResponseEntity.badRequest().body(ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
         }

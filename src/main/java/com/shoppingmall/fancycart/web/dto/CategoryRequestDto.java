@@ -14,6 +14,7 @@ public class CategoryRequestDto {
     @Length(max = 50)
     @Pattern(regexp = "^[ㄱ-ㅎ가-힣a-z0-9_-]{1,20}$")
     private String catNm;
+    @Length(min = 7, max = 7)
     private String upprCatCd;
     @Max(3)
     @NotNull
