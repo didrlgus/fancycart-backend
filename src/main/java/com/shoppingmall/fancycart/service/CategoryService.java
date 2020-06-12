@@ -3,7 +3,7 @@ package com.shoppingmall.fancycart.service;
 import com.shoppingmall.fancycart.domain.category.Category;
 import com.shoppingmall.fancycart.domain.category.CategoryRepository;
 import com.shoppingmall.fancycart.domain.tag.Tag;
-import com.shoppingmall.fancycart.exception.ExceptionUtils;
+import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.web.dto.CategoryRequestDto;
 import com.shoppingmall.fancycart.web.dto.CategoryResponseDto;
 import com.shoppingmall.fancycart.web.dto.CategoryUpdateRequestDto;

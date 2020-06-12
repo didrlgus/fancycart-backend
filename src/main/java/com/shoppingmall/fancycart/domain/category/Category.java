@@ -2,6 +2,7 @@ package com.shoppingmall.fancycart.domain.category;
 
 import com.shoppingmall.fancycart.domain.BaseTimeEntity;
 import com.shoppingmall.fancycart.domain.tag.Tag;
+import com.shoppingmall.fancycart.exception.InValidCategoryException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -55,13 +56,25 @@ public class Category extends BaseTimeEntity {
         return this;
     }
 
-    public static void lowerCategoryCdValidCheck(String categoryCd) throws Exception {
+    public static void upperCategoryCdValidCheck(String categoryCd) throws InValidCategoryException {
         if(!categoryCd.contains("C")) {
-            throw new Exception();
+            throw new InValidCategoryException();
+        }
+
+        String str = categoryCd.substring(1,4);
+        int code = Integer.parseInt(str);
+        if(code < 1) {
+            throw new InValidCategoryException();
+        }
+    }
+
+    public static void lowerCategoryCdValidCheck(String categoryCd) throws InValidCategoryException {
+        if(!categoryCd.contains("C")) {
+            throw new InValidCategoryException();
         }
         String str = categoryCd.substring(3);
         if(Integer.parseInt(str) % 1000 == 0) {
-            throw new Exception();
+            throw new InValidCategoryException();
         }
     }
 }

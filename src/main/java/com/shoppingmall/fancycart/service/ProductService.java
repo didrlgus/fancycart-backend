@@ -3,9 +3,9 @@ package com.shoppingmall.fancycart.service;
 import com.shoppingmall.fancycart.domain.category.Category;
 import com.shoppingmall.fancycart.domain.product.Product;
 import com.shoppingmall.fancycart.domain.product.ProductRepository;
-import com.shoppingmall.fancycart.exception.ExceptionUtils;
+import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.exception.InValidCategoryException;
-import com.shoppingmall.fancycart.web.dto.ProductParamRequestDto;
+import com.shoppingmall.fancycart.web.dto.ProductRequestDto;
 import com.shoppingmall.fancycart.web.dto.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,24 +26,40 @@ public class ProductService {
     private static final int PRODUCT_PAGE_SIZE = 9;
     private final ProductRepository productRepository;
 
-    public List<ProductResponseDto> getProductList(ProductParamRequestDto productRequestDto) {
-        validCheck(productRequestDto);
+    public List<ProductResponseDto> getProductList(ProductRequestDto.Get productRequestDto) {
+        paramValidCheck(productRequestDto);
 
         Page<Product> productList = getPagedProductList(productRequestDto);
 
         return getProductResponseDtoList(productList);
     }
 
-    private void validCheck(ProductParamRequestDto productRequestDto) {
+    public void addProduct(ProductRequestDto productRequestDto) {
+        productRequestDtoValidCheck(productRequestDto);
+
+        productRepository.save(Product.toProduct(productRequestDto));
+    }
+
+    private void productRequestDtoValidCheck(ProductRequestDto productRequestDto) {
+        try {
+            Category.upperCategoryCdValidCheck(productRequestDto.getLargeCatCd());
+            Category.lowerCategoryCdValidCheck(productRequestDto.getSmallCatCd());
+        } catch (InValidCategoryException e1) {
+            log.error("#### ProductService.productRequestDtoValidCheck {}", e1.getMessage());
+            throw new InValidCategoryException(ExceptionUtils.INVALID_CATEGORY_CODE_MESSAGE);
+        }
+    }
+    
+    private void paramValidCheck(ProductRequestDto.Get productRequestDto) {
         try {
             Category.lowerCategoryCdValidCheck(productRequestDto.getCategoryCd());
         } catch (Exception exception) {
-            log.error("#### ProductService.getProductList {}", exception.getMessage());
+            log.error("#### ProductService.paramValidCheck {}", exception.getMessage());
             throw new InValidCategoryException(ExceptionUtils.INVALID_CATEGORY_CODE_MESSAGE);
         }
     }
 
-    private Page<Product> getPagedProductList(ProductParamRequestDto productRequestDto) {
+    private Page<Product> getPagedProductList(ProductRequestDto.Get productRequestDto) {
         int page = productRequestDto.getPage() - 1;
         Pageable pageable
                 = PageRequest.of(page, PRODUCT_PAGE_SIZE, new Sort(Sort.Direction.DESC, "createdDate"));

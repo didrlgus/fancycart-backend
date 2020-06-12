@@ -1,4 +1,5 @@
-package com.shoppingmall.fancycart.exception;
+package com.shoppingmall.fancycart.utils;
+
 
 public class ExceptionUtils {
 
