@@ -6,7 +6,7 @@ import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
 import com.shoppingmall.fancycart.exception.DuplicatedTagOfUserException;
 import com.shoppingmall.fancycart.exception.ExceedTagOfUserException;
-import com.shoppingmall.fancycart.exception.ExceptionUtils;
+import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.web.dto.TagRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;

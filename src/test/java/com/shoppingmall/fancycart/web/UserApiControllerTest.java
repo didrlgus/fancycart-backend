@@ -7,7 +7,7 @@ import com.shoppingmall.fancycart.domain.tag.Tag;
 import com.shoppingmall.fancycart.domain.tag.TagRepository;
 import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
-import com.shoppingmall.fancycart.exception.ExceptionUtils;
+import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.utils.ApiUtils;
 import com.shoppingmall.fancycart.web.dto.TagRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;

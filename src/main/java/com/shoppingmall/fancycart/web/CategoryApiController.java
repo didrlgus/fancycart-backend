@@ -1,8 +1,9 @@
 package com.shoppingmall.fancycart.web;
 
-import com.shoppingmall.fancycart.exception.ExceptionUtils;
+import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.service.CategoryService;
 import com.shoppingmall.fancycart.utils.ApiUtils;
+import com.shoppingmall.fancycart.utils.RequestSuccessUtils;
 import com.shoppingmall.fancycart.web.dto.CategoryRequestDto;
 import com.shoppingmall.fancycart.web.dto.CategoryResponseDto;
 import com.shoppingmall.fancycart.web.dto.CategoryUpdateRequestDto;
@@ -34,7 +35,7 @@ public class CategoryApiController {
 
         categoryService.addCategory(categoryRequestDto);
 
-        return ResponseEntity.ok("카테고리가 생성되었습니다.");
+        return ResponseEntity.ok(RequestSuccessUtils.ADD_CATEGORY_SUCCESS_MESSAGE);
     }
 
     @PutMapping("/category/{id}")
@@ -47,6 +48,6 @@ public class CategoryApiController {
 
         categoryService.updateCategory(id,categoryUpdateRequestDto);
 
-        return ResponseEntity.ok("카테고리가 변경되었습니다.");
+        return ResponseEntity.ok(RequestSuccessUtils.UPDATE_CATEGORY_SUCCESS_MESSAGE);
     }
 }

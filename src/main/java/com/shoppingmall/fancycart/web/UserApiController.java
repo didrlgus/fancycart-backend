@@ -1,9 +1,10 @@
 package com.shoppingmall.fancycart.web;
 
 import com.shoppingmall.fancycart.domain.tag.Tag;
-import com.shoppingmall.fancycart.exception.ExceptionUtils;
+import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.service.UserService;
 import com.shoppingmall.fancycart.utils.ApiUtils;
+import com.shoppingmall.fancycart.utils.RequestSuccessUtils;
 import com.shoppingmall.fancycart.web.dto.TagRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
@@ -29,8 +30,8 @@ public class UserApiController {
 
     @PutMapping("/profiles/{id}")
     public ResponseEntity<?> updateProfile(@PathVariable Long id,
-                                              @Valid @RequestBody UserProfileRequestDto userProfileRequestDto,
-                                              Errors errors) {
+                                           @Valid @RequestBody UserProfileRequestDto userProfileRequestDto,
+                                           Errors errors) {
         if(errors.hasErrors()) {
             return ResponseEntity.badRequest().body(ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
         }
@@ -48,7 +49,7 @@ public class UserApiController {
 
         userService.addTag(id, tagRequestDto);
 
-        return ResponseEntity.ok().body("태그가 추가 되었습니다.");
+        return ResponseEntity.ok().body(RequestSuccessUtils.ADD_TAG_SUCCESS_MESSAGE);
     }
 
     @DeleteMapping("/user/{userId}/tags/{tagId}")
@@ -56,6 +57,6 @@ public class UserApiController {
 
         userService.deleteTag(userId, tagId);
 
-        return ResponseEntity.ok().body("태그가 삭제 되었습니다.");
+        return ResponseEntity.ok().body(RequestSuccessUtils.DELETE_TAG_SUCCESS_MESSAGE);
     }
 }
