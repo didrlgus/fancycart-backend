@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,6 +39,24 @@ public class ProductService {
         productRequestDtoValidCheck(productRequestDto);
 
         productRepository.save(Product.toProduct(productRequestDto));
+    }
+
+    public void updateProduct(Long id, ProductRequestDto productRequestDto) {
+        productRequestDtoValidCheck(productRequestDto);
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(ExceptionUtils.NO_EXIST_PRODUCT_MESSAGE));
+
+        product.update(productRequestDto);
+
+        productRepository.save(product);
+    }
+
+    public ProductResponseDto.Details getProductDetails(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(ExceptionUtils.NO_EXIST_PRODUCT_MESSAGE));
+
+        return product.toProductDetailsResponseDto(product);
     }
 
     private void productRequestDtoValidCheck(ProductRequestDto productRequestDto) {
@@ -85,4 +104,5 @@ public class ProductService {
 
         return productResponseDtoList;
     }
+
 }

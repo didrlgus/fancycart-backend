@@ -2,6 +2,7 @@ package com.shoppingmall.fancycart.domain.product;
 
 import com.shoppingmall.fancycart.domain.BaseTimeEntity;
 import com.shoppingmall.fancycart.web.dto.ProductRequestDto;
+import com.shoppingmall.fancycart.web.dto.ProductResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -70,6 +71,33 @@ public class Product extends BaseTimeEntity {
                 .fullDescription(productRequestDto.getFullDescription())
                 .totalCount(productRequestDto.getTotalCount())
                 .titleImg(productRequestDto.getTitleImg())
+                .build();
+    }
+
+    public Product update(ProductRequestDto productRequestDto) {
+        this.productNm = productRequestDto.getProductNm();
+        this.price = productRequestDto.getPrice();
+        this.largeCatCd = productRequestDto.getLargeCatCd();
+        this.smallCatCd = productRequestDto.getSmallCatCd();
+        this.totalCount = productRequestDto.getTotalCount();
+        this.titleImg = productRequestDto.getTitleImg();
+        this.fullDescription = productRequestDto.getFullDescription();
+
+        return this;
+    }
+
+    public ProductResponseDto.Details toProductDetailsResponseDto(Product product) {
+        return ProductResponseDto.Details.builder()
+                .id(product.getId())
+                .productNm(product.getProductNm())
+                .price(product.getPrice())
+                .totalCount(product.getTotalCount())
+                .rateAvg(product.getRateAvg())
+                .purchaseCount(product.getPurchaseCount())
+                .fullDescription(product.getFullDescription())
+                .titleImg(product.getTitleImg())
+                .smallCatCd(product.getSmallCatCd())
+                .largeCatCd(product.getLargeCatCd())
                 .build();
     }
 }

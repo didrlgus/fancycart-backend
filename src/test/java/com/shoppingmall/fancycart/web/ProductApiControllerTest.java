@@ -31,6 +31,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
@@ -135,7 +137,7 @@ public class ProductApiControllerTest {
 
         MvcResult result = callAddProductAPI(productRequestDto, STATUS_OK);
 
-        Product product = productRepository.findByProductNm("Test-product");
+        Product product = productRepository.findByProductNmOrderByCreatedDateDesc(productRequestDto.getProductNm());
 
         assertEquals(result.getResponse().getContentAsString(), RequestSuccessUtils.ADD_PRODUCT_SUCCESS_MESSAGE);
         assertEquals(product.getProductNm(), "Test-product");
@@ -148,7 +150,9 @@ public class ProductApiControllerTest {
         ProductRequestDto productRequestDto
                 = getInvalidProductRequestDto(INVALID_PRODUCT_NAME, VALID_UPPER_CATEGORY_CD, VALID_LOWER_CATEGORY_CD,
                 INVALID_PRICE, INVALID_TOTAL_COUNT, INVALID_TITLE_IMG, INVALID_FULL_DESCRIPTION);
+
         MvcResult result = callAddProductAPI(productRequestDto, STATUS_CLIENT_ERROR);
+
         assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
     }
 
@@ -167,6 +171,66 @@ public class ProductApiControllerTest {
         assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INVALID_CATEGORY_CODE_MESSAGE);
     }
 
+    // 상품 수정 테스트
+    @WithMockUser(roles = "ADMIN")
+    @Test
+    public void updateProductTest() throws Exception {
+        Product product = getProduct();
+
+        ProductRequestDto productUpdateRequestDto = getUpdateProductRequestDto();
+
+        MvcResult result = callUpdateProductAPI(product.getId(), productUpdateRequestDto, STATUS_OK);
+        assertEquals(result.getResponse().getContentAsString(), RequestSuccessUtils.UPDATE_PRODUCT_SUCCESS_MESSAGE);
+
+        Optional<Product> updatedProduct = productRepository.findById(product.getId());
+        product = updatedProduct.orElseThrow(NoSuchElementException::new);
+
+        assertEquals(product.getProductNm(), productUpdateRequestDto.getProductNm());
+        assertEquals(product.getPrice(), productUpdateRequestDto.getPrice());
+    }
+
+    // 상품 수정 유효성 테스트
+    @WithMockUser(roles = "ADMIN")
+    @Test
+    public void updateProductValidTest() throws Exception {
+        Product product = getProduct();
+
+        ProductRequestDto updateProductRequestDto = getInvalidProductRequestDto(INVALID_PRODUCT_NAME, VALID_UPPER_CATEGORY_CD, VALID_LOWER_CATEGORY_CD,
+                INVALID_PRICE, INVALID_TOTAL_COUNT, INVALID_TITLE_IMG, INVALID_FULL_DESCRIPTION);
+
+        MvcResult result = callUpdateProductAPI(product.getId(), updateProductRequestDto, STATUS_CLIENT_ERROR);
+
+        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
+    }
+
+    // 상품 상세조회 테스트
+    @WithMockUser(roles = "ADMIN")
+    @Test
+    public void getProductDetailsTest() throws Exception {
+        Product product = getProduct();
+        ProductResponseDto.Details productDetailsResponseDto = getProductDetailsResponseDto(product);
+
+        MvcResult result = callProductDetailsAPI(product.getId(), STATUS_OK);
+
+        assertEquals(result.getResponse().getContentAsString(),
+                new ObjectMapper().writeValueAsString(productDetailsResponseDto));
+    }
+
+    // 상품 상세조회 유효성 테스트
+    @Test
+    public void getProductDetailsValidTest() throws Exception {
+        MvcResult result = callProductDetailsAPI(-1L, STATUS_CLIENT_ERROR);
+
+        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.NO_EXIST_PRODUCT_MESSAGE);
+    }
+
+    private MvcResult callProductDetailsAPI(Long id, ResultMatcher status) throws Exception {
+        return mockMvc.perform(get(API_VERSION + "/products/" + id)
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status)
+                .andReturn();
+    }
+
     private MvcResult callFindProductAPI(MultiValueMap<String, String> param,
                                          List<ProductResponseDto> productResponseDtoList,
                                          ResultMatcher status) throws Exception {
@@ -183,6 +247,14 @@ public class ProductApiControllerTest {
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(productRequestDto)))
                 .andExpect(status).andReturn();
+    }
+
+    private MvcResult callUpdateProductAPI(Long id, ProductRequestDto productRequestDto, ResultMatcher status) throws Exception {
+        return mockMvc.perform(put(API_VERSION + "/products/" + id)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(new ObjectMapper().writeValueAsString(productRequestDto)))
+                .andExpect(status)
+                .andReturn();
     }
 
     private Page<Product> getPagedProductList() {
@@ -245,6 +317,40 @@ public class ProductApiControllerTest {
                 .totalCount(totalCount)
                 .titleImg(titleImg)
                 .fullDescription(fullDescription)
+                .build();
+    }
+
+    private ProductRequestDto getUpdateProductRequestDto() {
+        return ProductRequestDto.builder()
+                .productNm("update-productNm")
+                .largeCatCd(VALID_UPPER_CATEGORY_CD)
+                .smallCatCd(VALID_LOWER_CATEGORY_CD)
+                .price(25000)
+                .totalCount(200)
+                .titleImg("update-title-img.png")
+                .fullDescription("update-full-description")
+                .build();
+    }
+
+    private Product getProduct() throws Exception {
+        ProductRequestDto productRequestDto = getProductRequestDto();
+        callAddProductAPI(productRequestDto, STATUS_OK);
+
+        return productRepository.findByProductNmOrderByCreatedDateDesc(productRequestDto.getProductNm());
+    }
+
+    private ProductResponseDto.Details getProductDetailsResponseDto(Product product) {
+        return ProductResponseDto.Details.builder()
+                .id(product.getId())
+                .productNm(product.getProductNm())
+                .largeCatCd(product.getLargeCatCd())
+                .smallCatCd(product.getSmallCatCd())
+                .price(product.getPrice())
+                .titleImg(product.getTitleImg())
+                .fullDescription(product.getFullDescription())
+                .purchaseCount(product.getPurchaseCount())
+                .rateAvg(product.getRateAvg())
+                .totalCount(product.getTotalCount())
                 .build();
     }
 }

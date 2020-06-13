@@ -10,5 +10,6 @@ public class ExceptionUtils {
     public static final String INPUT_EXCEPTION_MESSAGE = "입력값이 유효하지 않습니다.";
     public static final String INVALID_CATEGORY_CODE_MESSAGE = "카테고리 코드가 유효하지 않습니다.";
     public static final String INVALID_PAGE_MESSAGE = "페이지가 유효하지 않습니다.";
+    public static final String NO_EXIST_PRODUCT_MESSAGE = "존재하지 않는 상품 입니다.";
 
 }

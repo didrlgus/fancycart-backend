@@ -5,6 +5,7 @@ import com.shoppingmall.fancycart.service.ProductService;
 import com.shoppingmall.fancycart.utils.ApiUtils;
 import com.shoppingmall.fancycart.utils.RequestSuccessUtils;
 import com.shoppingmall.fancycart.web.dto.ProductRequestDto;
+import com.shoppingmall.fancycart.web.dto.ProductResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -39,4 +40,23 @@ public class ProductApiController {
 
         return ResponseEntity.ok(RequestSuccessUtils.ADD_PRODUCT_SUCCESS_MESSAGE);
     }
+
+    @PutMapping("/products/{id}")
+    public ResponseEntity<String> updateProduct(@PathVariable Long id, @Valid @RequestBody ProductRequestDto productRequestDto,
+                                                Errors errors) {
+        if(errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
+        }
+
+        productService.updateProduct(id, productRequestDto);
+
+        return ResponseEntity.ok(RequestSuccessUtils.UPDATE_PRODUCT_SUCCESS_MESSAGE);
+    }
+
+    @GetMapping("/products/{id}")
+    public ResponseEntity<ProductResponseDto.Details> getProductDetails(@PathVariable Long id) {
+
+        return ResponseEntity.ok(productService.getProductDetails(id));
+    }
+
 }

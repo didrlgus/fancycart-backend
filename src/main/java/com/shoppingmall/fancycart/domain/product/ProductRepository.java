@@ -9,5 +9,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Page<Product> findBySmallCatCd(String categoryCd, Pageable pageable);
 
-    Product findByProductNm(String productNm);
+    Product findByProductNmOrderByCreatedDateDesc(String productNm);
 }
