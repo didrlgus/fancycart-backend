@@ -1,8 +1,11 @@
 package com.shoppingmall.fancycart.web.dto;
 
 import com.shoppingmall.fancycart.domain.product.Product;
+import com.shoppingmall.fancycart.domain.review.Review;
 import lombok.Builder;
 import lombok.Getter;
+
+import java.util.List;
 
 @Getter
 public class ProductResponseDto {
@@ -47,5 +50,7 @@ public class ProductResponseDto {
         private Integer rateAvg;
 
         private String fullDescription;
+
+        private List<ReviewResponseDto> reviewResponseDtoList;
     }
 }

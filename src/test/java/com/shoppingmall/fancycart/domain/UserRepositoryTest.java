@@ -41,7 +41,9 @@ public class UserRepositoryTest {
         Authentication authentication = authUtils.getAuthentication();
         assertEquals(authentication.getAuthorities().stream().map(String::valueOf)
                 .collect(Collectors.toList()).get(0), Role.USER.getKey());
+
         UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+
         assertEquals(userPrincipal.getEmail(), AUTH_EMAIL);
     }
 

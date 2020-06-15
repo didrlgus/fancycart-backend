@@ -1,13 +1,15 @@
 package com.shoppingmall.fancycart.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shoppingmall.fancycart.auth.AuthUtils;
+import com.shoppingmall.fancycart.domain.buyer.Buyer;
+import com.shoppingmall.fancycart.domain.buyer.BuyerRepository;
 import com.shoppingmall.fancycart.domain.product.Product;
 import com.shoppingmall.fancycart.domain.product.ProductRepository;
-import com.shoppingmall.fancycart.utils.ExceptionUtils;
-import com.shoppingmall.fancycart.utils.ApiUtils;
-import com.shoppingmall.fancycart.utils.RequestSuccessUtils;
+import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.web.dto.ProductRequestDto;
 import com.shoppingmall.fancycart.web.dto.ProductResponseDto;
+import com.shoppingmall.fancycart.web.dto.ReviewRequestDto;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,6 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
@@ -34,18 +37,22 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static com.shoppingmall.fancycart.utils.ApiUtils.API_VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.shoppingmall.fancycart.utils.ExceptionUtils.*;
+import static com.shoppingmall.fancycart.utils.RequestSuccessUtils.*;
 
+@Transactional
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ProductApiControllerTest {
 
-    private final String API_VERSION = ApiUtils.API_VERSION;
     private final static ResultMatcher STATUS_OK = status().isOk();
     private final static ResultMatcher STATUS_CLIENT_ERROR = status().is4xxClientError();
+    private final static ResultMatcher STATUS_REDIRECTION = status().is3xxRedirection();
     private final static int VALID_PAGE = 1;
     private final static int INVALID_PAGE = -1;
     private final static String VALID_UPPER_CATEGORY_CD = "C001000";
@@ -68,6 +75,10 @@ public class ProductApiControllerTest {
     private WebApplicationContext context;
     @Autowired
     private ProductRepository productRepository;
+    @Autowired
+    private BuyerRepository buyerRepository;
+    @Autowired
+    private AuthUtils authUtils;
 
     @Before
     public void setup() {
@@ -93,7 +104,7 @@ public class ProductApiControllerTest {
 
         MultiValueMap<String, String> multiValueMap = getParamForFindProductAPI(VALID_PAGE, VALID_LOWER_CATEGORY_CD);
 
-        MvcResult result = callFindProductAPI(multiValueMap, productResponseDtoList, STATUS_OK);
+        MvcResult result = callFindProductAPI(multiValueMap, STATUS_OK);
 
         assertEquals(result.getResponse().getContentAsString(), new ObjectMapper().writeValueAsString(productResponseDtoList));
     }
@@ -103,21 +114,17 @@ public class ProductApiControllerTest {
     public void getProductValidTest() throws Exception {
         bulkTestProducts();
 
-        Page<Product> productList = getPagedProductList();
-
-        List<ProductResponseDto> productResponseDtoList = getProductResponseDtoList(productList);
-
         MultiValueMap<String, String> multiValueMap
                 = getParamForFindProductAPI(INVALID_PAGE, VALID_LOWER_CATEGORY_CD);
         // 유효하지 않은 페이지 파라미터 포함 요청 시
-        MvcResult result = callFindProductAPI(multiValueMap, productResponseDtoList, STATUS_CLIENT_ERROR);
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
+        MvcResult result = callFindProductAPI(multiValueMap, STATUS_CLIENT_ERROR);
+        assertEquals(result.getResponse().getContentAsString(), INPUT_EXCEPTION_MESSAGE);
 
         multiValueMap = getParamForFindProductAPI(VALID_PAGE, INVALID_LOWER_CATEGORY_CD);
 
         // 유효하지 않은 카테고리 코드 파라미터 포함 요청 시
-        result = callFindProductAPI(multiValueMap, productResponseDtoList, STATUS_CLIENT_ERROR);
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INVALID_CATEGORY_CODE_MESSAGE);
+        result = callFindProductAPI(multiValueMap, STATUS_CLIENT_ERROR);
+        assertEquals(result.getResponse().getContentAsString(), INVALID_CATEGORY_CODE_MESSAGE);
     }
 
     // 상품 추가 권한 테스트
@@ -139,7 +146,7 @@ public class ProductApiControllerTest {
 
         Product product = productRepository.findByProductNmOrderByCreatedDateDesc(productRequestDto.getProductNm());
 
-        assertEquals(result.getResponse().getContentAsString(), RequestSuccessUtils.ADD_PRODUCT_SUCCESS_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), ADD_PRODUCT_SUCCESS_MESSAGE);
         assertEquals(product.getProductNm(), "Test-product");
     }
 
@@ -153,7 +160,7 @@ public class ProductApiControllerTest {
 
         MvcResult result = callAddProductAPI(productRequestDto, STATUS_CLIENT_ERROR);
 
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), INPUT_EXCEPTION_MESSAGE);
     }
 
     // 상품 추가 유효성 테스트 (카테고리 코드)
@@ -163,12 +170,12 @@ public class ProductApiControllerTest {
         ProductRequestDto productRequestDto = getInvalidProductRequestDto(VALID_PRODUCT_NAME, INVALID_UPPER_CATEGORY_CD, VALID_LOWER_CATEGORY_CD,
                 VALID_PRICE, VALID_TOTAL_COUNT, VALID_TITLE_IMG, VALID_FULL_DESCRIPTION);
         MvcResult result = callAddProductAPI(productRequestDto, STATUS_CLIENT_ERROR);
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INVALID_CATEGORY_CODE_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), INVALID_CATEGORY_CODE_MESSAGE);
 
         productRequestDto = getInvalidProductRequestDto(VALID_PRODUCT_NAME, VALID_UPPER_CATEGORY_CD, INVALID_LOWER_CATEGORY_CD,
                 VALID_PRICE, VALID_TOTAL_COUNT, VALID_TITLE_IMG, VALID_FULL_DESCRIPTION);
         result = callAddProductAPI(productRequestDto, STATUS_CLIENT_ERROR);
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INVALID_CATEGORY_CODE_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), INVALID_CATEGORY_CODE_MESSAGE);
     }
 
     // 상품 수정 테스트
@@ -180,7 +187,7 @@ public class ProductApiControllerTest {
         ProductRequestDto productUpdateRequestDto = getUpdateProductRequestDto();
 
         MvcResult result = callUpdateProductAPI(product.getId(), productUpdateRequestDto, STATUS_OK);
-        assertEquals(result.getResponse().getContentAsString(), RequestSuccessUtils.UPDATE_PRODUCT_SUCCESS_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), UPDATE_PRODUCT_SUCCESS_MESSAGE);
 
         Optional<Product> updatedProduct = productRepository.findById(product.getId());
         product = updatedProduct.orElseThrow(NoSuchElementException::new);
@@ -200,7 +207,7 @@ public class ProductApiControllerTest {
 
         MvcResult result = callUpdateProductAPI(product.getId(), updateProductRequestDto, STATUS_CLIENT_ERROR);
 
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), INPUT_EXCEPTION_MESSAGE);
     }
 
     // 상품 상세조회 테스트
@@ -221,7 +228,53 @@ public class ProductApiControllerTest {
     public void getProductDetailsValidTest() throws Exception {
         MvcResult result = callProductDetailsAPI(-1L, STATUS_CLIENT_ERROR);
 
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.NO_EXIST_PRODUCT_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), NO_EXIST_PRODUCT_MESSAGE);
+    }
+
+    // 상품 리뷰 추가 테스트
+    @Test
+    public void addProductReviewTest() throws Exception {
+        authUtils.authenticate();
+        User user = authUtils.getAuthenticatedUser();
+
+        productRepository.save(Product.builder().productNm("test").build());
+        Product product = productRepository.findByProductNmOrderByCreatedDateDesc("test");
+
+        Buyer buyer = Buyer.builder().user(user).product(product).build();
+        buyerRepository.save(buyer);
+
+        ReviewRequestDto reviewRequestDto = getReviewRequestDto(user.getId());
+
+        MvcResult result = callAddReviewTest(product.getId(), reviewRequestDto, STATUS_OK);
+
+        assertEquals(result.getResponse().getContentAsString(), ADD_REVIEW_SUCCESS_MESSAGE);
+    }
+
+    // 상품 리뷰 추가 권한 테스트
+    @Test
+    public void addProductReviewAuthorityTest() throws Exception {
+        productRepository.save(Product.builder().productNm("test").build());
+        Product product = productRepository.findByProductNmOrderByCreatedDateDesc("test");
+
+        ReviewRequestDto reviewRequestDto = getReviewRequestDto(1L);
+
+        callAddReviewTest(product.getId(), reviewRequestDto, STATUS_REDIRECTION);       // 로그인이 안되어 있으면 redirect
+    }
+
+    // 상품 리뷰 추가 유효성 테스트
+    @Test
+    public void addProductReviewValidTest() throws Exception {
+        authUtils.authenticate();
+        User user = authUtils.getAuthenticatedUser();
+
+        productRepository.save(Product.builder().productNm("test").build());
+        Product product = productRepository.findByProductNmOrderByCreatedDateDesc("test");
+
+        ReviewRequestDto reviewRequestDto = getReviewRequestDto(user.getId());
+
+        MvcResult result = callAddReviewTest(product.getId(), reviewRequestDto, STATUS_CLIENT_ERROR);
+
+        assertEquals(result.getResponse().getContentAsString(), REVIEW_AUTHORITY_EXCEPTION_MESSAGE);
     }
 
     private MvcResult callProductDetailsAPI(Long id, ResultMatcher status) throws Exception {
@@ -232,7 +285,6 @@ public class ProductApiControllerTest {
     }
 
     private MvcResult callFindProductAPI(MultiValueMap<String, String> param,
-                                         List<ProductResponseDto> productResponseDtoList,
                                          ResultMatcher status) throws Exception {
         return mockMvc.perform(get(API_VERSION + "/products")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -253,6 +305,14 @@ public class ProductApiControllerTest {
         return mockMvc.perform(put(API_VERSION + "/products/" + id)
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(productRequestDto)))
+                .andExpect(status)
+                .andReturn();
+    }
+
+    private MvcResult callAddReviewTest(Long productId, ReviewRequestDto reviewRequestDto, ResultMatcher status) throws Exception {
+        return mockMvc.perform(post(API_VERSION + "/products/" + productId + "/reviews")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(new ObjectMapper().writeValueAsString(reviewRequestDto)))
                 .andExpect(status)
                 .andReturn();
     }
@@ -351,6 +411,16 @@ public class ProductApiControllerTest {
                 .purchaseCount(product.getPurchaseCount())
                 .rateAvg(product.getRateAvg())
                 .totalCount(product.getTotalCount())
+                .reviewResponseDtoList(product.toReviewResponseDtoList(product.getReviewList()))
+                .build();
+    }
+
+    private ReviewRequestDto getReviewRequestDto(Long userId) {
+        return ReviewRequestDto.builder()
+                .userId(userId)
+                .title("test-review-title")
+                .content("test-review-content")
+                .rate(3)
                 .build();
     }
 }

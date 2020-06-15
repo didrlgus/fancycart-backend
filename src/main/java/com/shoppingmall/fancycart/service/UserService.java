@@ -6,7 +6,6 @@ import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
 import com.shoppingmall.fancycart.exception.DuplicatedTagOfUserException;
 import com.shoppingmall.fancycart.exception.ExceedTagOfUserException;
-import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.web.dto.TagRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
@@ -18,6 +17,8 @@ import javax.validation.Valid;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+
+import static com.shoppingmall.fancycart.utils.ExceptionUtils.*;
 
 @Transactional
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class UserService {
         Tag tag = tagRepository.findByTitle(tagRequestDto.getTitle());
 
         if(tag == null) {
-            throw new NoSuchElementException(ExceptionUtils.NO_EXIST_TAG_MESSAGE);
+            throw new NoSuchElementException(NO_EXIST_TAG_MESSAGE);
         }
 
         Optional<User> userOpt = userRepository.findById(id);
@@ -55,13 +56,13 @@ public class UserService {
         Set<Tag> tags = user.getTags();
 
         if(tags.size() >= 10) {
-            throw new ExceedTagOfUserException(ExceptionUtils.AVAILABLE_TAG_EXCEED_MESSAGE);
+            throw new ExceedTagOfUserException(AVAILABLE_TAG_EXCEED_MESSAGE);
         }
 
         boolean ret = tags.stream().anyMatch(t -> t.getTitle().equals(tag.getTitle()));
 
         if(ret) {
-            throw new DuplicatedTagOfUserException(ExceptionUtils.DUPLICATED_TAG_MESSAGE);
+            throw new DuplicatedTagOfUserException(DUPLICATED_TAG_MESSAGE);
         }
 
         userOpt.orElseThrow(NoSuchElementException::new).getTags().add(tag);
@@ -69,7 +70,7 @@ public class UserService {
 
     private User getUser(Long id) {
         Optional<User> userOpt = userRepository.findById(id);
-        return userOpt.orElseThrow(()-> new NoSuchElementException(ExceptionUtils.NO_EXIST_USER_MESSAGE));
+        return userOpt.orElseThrow(()-> new NoSuchElementException(NO_EXIST_USER_MESSAGE));
     }
 
     private User updateUserAddr(User user, UserProfileRequestDto userProfileRequestDto) {
@@ -83,8 +84,8 @@ public class UserService {
         Optional<User> userOpt = userRepository.findById(userId);
         Optional<Tag> tagOpt = tagRepository.findById(tagId);
 
-        User user = userOpt.orElseThrow(() -> new NoSuchElementException(ExceptionUtils.NO_EXIST_USER_MESSAGE));
-        Tag tag = tagOpt.orElseThrow(() -> new NoSuchElementException(ExceptionUtils.NO_EXIST_TAG_MESSAGE));
+        User user = userOpt.orElseThrow(() -> new NoSuchElementException(NO_EXIST_USER_MESSAGE));
+        Tag tag = tagOpt.orElseThrow(() -> new NoSuchElementException(NO_EXIST_TAG_MESSAGE));
 
         user.getTags().remove(tag);
     }

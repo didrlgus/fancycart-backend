@@ -1,14 +1,20 @@
 package com.shoppingmall.fancycart.domain.product;
 
 import com.shoppingmall.fancycart.domain.BaseTimeEntity;
+import com.shoppingmall.fancycart.domain.buyer.Buyer;
+import com.shoppingmall.fancycart.domain.review.Review;
 import com.shoppingmall.fancycart.web.dto.ProductRequestDto;
 import com.shoppingmall.fancycart.web.dto.ProductResponseDto;
+import com.shoppingmall.fancycart.web.dto.ReviewResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor
@@ -46,6 +52,9 @@ public class Product extends BaseTimeEntity {
 
     @Lob @Basic(fetch = FetchType.EAGER)
     private String fullDescription;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Review> reviewList = new ArrayList<>();
 
     @Builder
     public Product(String productNm, String largeCatCd, String smallCatCd,
@@ -98,6 +107,18 @@ public class Product extends BaseTimeEntity {
                 .titleImg(product.getTitleImg())
                 .smallCatCd(product.getSmallCatCd())
                 .largeCatCd(product.getLargeCatCd())
+                .reviewResponseDtoList(toReviewResponseDtoList(product.getReviewList()))
                 .build();
     }
+
+    public List<ReviewResponseDto> toReviewResponseDtoList(List<Review> reviewList) {
+        return reviewList.stream().map(review -> ReviewResponseDto.builder()
+                        .review(review)
+                        .build()).collect(Collectors.toList());
+    }
+
+    public void setRateAvg(int productRateAvg) {
+        this.rateAvg = productRateAvg;
+    }
+
 }
