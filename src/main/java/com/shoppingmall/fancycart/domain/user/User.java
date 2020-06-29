@@ -3,6 +3,7 @@ package com.shoppingmall.fancycart.domain.user;
 import com.shoppingmall.fancycart.domain.BaseTimeEntity;
 
 import com.shoppingmall.fancycart.domain.tag.Tag;
+import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -58,7 +59,7 @@ public class User extends BaseTimeEntity {
         this.role = role;
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
-        this. detailAddr = detailAddr;
+        this.detailAddr = detailAddr;
         this.agreeMessageByEmail = agreeMessageByEmail;
     }
 
@@ -81,5 +82,9 @@ public class User extends BaseTimeEntity {
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public UserProfileResponseDto.Review toUserReviewResponseDto(User user) {
+        return new UserProfileResponseDto.Review(user);
     }
 }

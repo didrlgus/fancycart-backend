@@ -1,6 +1,7 @@
 package com.shoppingmall.fancycart.web;
 
 import com.shoppingmall.fancycart.domain.tag.Tag;
+import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.service.UserService;
 import com.shoppingmall.fancycart.web.dto.TagRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
@@ -43,6 +44,16 @@ public class UserApiController {
     @GetMapping("/user/{id}/tags")
     public ResponseEntity<Set<Tag>> getTags(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getTags(id));
+    }
+
+    @PostMapping("/user")
+    public ResponseEntity<String> addUser(@RequestBody User user) {
+        System.out.println(user.getName());
+        System.out.println(user.getEmail());
+        System.out.println(user.getRoadAddr());
+        System.out.println(user.getBuildingName());
+        System.out.println(user.getDetailAddr());
+        return ResponseEntity.ok("Success!");
     }
 
     @PostMapping("/user/{id}/tags")

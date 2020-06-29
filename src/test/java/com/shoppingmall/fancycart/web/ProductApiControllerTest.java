@@ -245,7 +245,7 @@ public class ProductApiControllerTest {
 
         ReviewRequestDto reviewRequestDto = getReviewRequestDto(user.getId());
 
-        MvcResult result = callAddReviewTest(product.getId(), reviewRequestDto, STATUS_OK);
+        MvcResult result = callAddReviewAPI(product.getId(), reviewRequestDto, STATUS_OK);
 
         assertEquals(result.getResponse().getContentAsString(), ADD_REVIEW_SUCCESS_MESSAGE);
     }
@@ -258,7 +258,7 @@ public class ProductApiControllerTest {
 
         ReviewRequestDto reviewRequestDto = getReviewRequestDto(1L);
 
-        callAddReviewTest(product.getId(), reviewRequestDto, STATUS_REDIRECTION);       // 로그인이 안되어 있으면 redirect
+        callAddReviewAPI(product.getId(), reviewRequestDto, STATUS_REDIRECTION);       // 로그인이 안되어 있으면 redirect
     }
 
     // 상품 리뷰 추가 유효성 테스트
@@ -272,9 +272,31 @@ public class ProductApiControllerTest {
 
         ReviewRequestDto reviewRequestDto = getReviewRequestDto(user.getId());
 
-        MvcResult result = callAddReviewTest(product.getId(), reviewRequestDto, STATUS_CLIENT_ERROR);
+        MvcResult result = callAddReviewAPI(product.getId(), reviewRequestDto, STATUS_CLIENT_ERROR);
 
         assertEquals(result.getResponse().getContentAsString(), REVIEW_AUTHORITY_EXCEPTION_MESSAGE);
+    }
+    
+    // 상품 리뷰 조회 테스트
+    @Test
+    public void getProductReviewTest() throws Exception {
+        authUtils.authenticate();
+        User user = authUtils.getAuthenticatedUser();
+
+        productRepository.save(Product.builder().productNm("test").build());
+        Product product = productRepository.findByProductNmOrderByCreatedDateDesc("test");
+
+        Buyer buyer = Buyer.builder().user(user).product(product).build();
+        buyerRepository.save(buyer);
+
+        ReviewRequestDto reviewRequestDto = getReviewRequestDto(user.getId());
+
+        // 50개의 리뷰 저장
+        for(int i = 0; i < 50; i++) {
+            callAddReviewAPI(product.getId(), reviewRequestDto, STATUS_OK);
+        }
+
+        callGetReviewAPI(product.getId(), STATUS_OK);
     }
 
     private MvcResult callProductDetailsAPI(Long id, ResultMatcher status) throws Exception {
@@ -309,12 +331,19 @@ public class ProductApiControllerTest {
                 .andReturn();
     }
 
-    private MvcResult callAddReviewTest(Long productId, ReviewRequestDto reviewRequestDto, ResultMatcher status) throws Exception {
+    private MvcResult callAddReviewAPI(Long productId, ReviewRequestDto reviewRequestDto, ResultMatcher status) throws Exception {
         return mockMvc.perform(post(API_VERSION + "/products/" + productId + "/reviews")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
                 .content(new ObjectMapper().writeValueAsString(reviewRequestDto)))
                 .andExpect(status)
                 .andReturn();
+    }
+
+    private MvcResult callGetReviewAPI(Long productId, ResultMatcher status) throws Exception {
+        return mockMvc.perform(get(API_VERSION + "/products/" + productId + "/reviews")
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .param("page", "3"))
+                .andExpect(status).andReturn();
     }
 
     private Page<Product> getPagedProductList() {
@@ -411,7 +440,6 @@ public class ProductApiControllerTest {
                 .purchaseCount(product.getPurchaseCount())
                 .rateAvg(product.getRateAvg())
                 .totalCount(product.getTotalCount())
-                .reviewResponseDtoList(product.toReviewResponseDtoList(product.getReviewList()))
                 .build();
     }
 

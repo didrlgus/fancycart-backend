@@ -15,11 +15,14 @@ public class ReviewResponseDto {
 
     private int rate;
 
+    private UserProfileResponseDto.Review userReviewResponseDto;
+
     @Builder
     public ReviewResponseDto(Review review) {
         this.id = review.getId();
         this.title = review.getTitle();
         this.content = review.getContent();
         this.rate = review.getRate();
+        this.userReviewResponseDto = review.getUser().toUserReviewResponseDto(review.getUser());
     }
 }

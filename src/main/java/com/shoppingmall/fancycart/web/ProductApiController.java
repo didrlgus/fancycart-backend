@@ -63,8 +63,8 @@ public class ProductApiController {
 
     @PostMapping("/products/{id}/reviews")
     public ResponseEntity<String> addReview(@PathVariable("id") Long productId,
-                                                      @Valid @RequestBody ReviewRequestDto reviewRequestDto,
-                                                      Errors errors) {
+                                            @Valid @RequestBody ReviewRequestDto reviewRequestDto,
+                                            Errors errors) {
         if(errors.hasErrors()) {
             return ResponseEntity.badRequest().body(INPUT_EXCEPTION_MESSAGE);
         }
@@ -72,6 +72,17 @@ public class ProductApiController {
         productService.addReview(productId, reviewRequestDto);
 
         return ResponseEntity.ok().body(ADD_REVIEW_SUCCESS_MESSAGE);
+    }
+
+    @GetMapping("/products/{id}/reviews")
+    public ResponseEntity<?> getReviews(@PathVariable("id") Long productId,
+                                        @Valid ReviewRequestDto.Get reviewRequestDto,
+                                        Errors errors) {
+        if(errors.hasErrors()) {
+            return ResponseEntity.badRequest().body(INPUT_EXCEPTION_MESSAGE);
+        }
+
+        return ResponseEntity.ok(productService.getReviews(productId, reviewRequestDto));
     }
 
 }

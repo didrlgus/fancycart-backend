@@ -107,14 +107,7 @@ public class Product extends BaseTimeEntity {
                 .titleImg(product.getTitleImg())
                 .smallCatCd(product.getSmallCatCd())
                 .largeCatCd(product.getLargeCatCd())
-                .reviewResponseDtoList(toReviewResponseDtoList(product.getReviewList()))
                 .build();
-    }
-
-    public List<ReviewResponseDto> toReviewResponseDtoList(List<Review> reviewList) {
-        return reviewList.stream().map(review -> ReviewResponseDto.builder()
-                        .review(review)
-                        .build()).collect(Collectors.toList());
     }
 
     public void setRateAvg(int productRateAvg) {

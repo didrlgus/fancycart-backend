@@ -14,6 +14,7 @@ import com.shoppingmall.fancycart.exception.InValidCategoryException;
 import com.shoppingmall.fancycart.web.dto.ProductRequestDto;
 import com.shoppingmall.fancycart.web.dto.ProductResponseDto;
 import com.shoppingmall.fancycart.web.dto.ReviewRequestDto;
+import com.shoppingmall.fancycart.web.dto.ReviewResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,7 @@ import static com.shoppingmall.fancycart.utils.ExceptionUtils.*;
 public class ProductService {
 
     private static final int PRODUCT_PAGE_SIZE = 9;
+    private static final int REVIEW_PAGE_SIZE = 10;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
@@ -94,6 +96,16 @@ public class ProductService {
 
         // 상품 평점 업데이트
         productRepository.save(product);
+    }
+
+    public List<ReviewResponseDto> getReviews(Long productId, ReviewRequestDto.Get reviewRequestDto) {
+        int page = reviewRequestDto.getPage() - 1;
+        Pageable pageable
+                = PageRequest.of(page, REVIEW_PAGE_SIZE, new Sort(Sort.Direction.DESC, "createdDate"));
+
+        Page<Review> reviewList = reviewRepository.findByProductId(productId, pageable);
+
+        return Review.toReviewResponseDtoList(reviewList);
     }
 
     private int getProductRateAvg(Product product) {
@@ -168,5 +180,6 @@ public class ProductService {
 
         return productResponseDtoList;
     }
+
 
 }

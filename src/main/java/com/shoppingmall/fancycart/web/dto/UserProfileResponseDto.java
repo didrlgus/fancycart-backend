@@ -24,4 +24,19 @@ public class UserProfileResponseDto {
         this.detailAddr = entity.getDetailAddr();
         this.agreeMessageByEmail = entity.isAgreeMessageByEmail();
     }
+
+    @Getter
+    public static class Review {
+        private Long id;
+        private String name;
+        private String email;
+        private String picture;
+
+        public Review(User user) {
+            this.id = user.getId();
+            this.name = user.getName();
+            this.email = user.getEmail();
+            this.picture = user.getPicture();
+        }
+    }
 }
