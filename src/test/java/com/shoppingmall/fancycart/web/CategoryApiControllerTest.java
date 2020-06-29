@@ -5,7 +5,6 @@ import com.shoppingmall.fancycart.domain.category.Category;
 import com.shoppingmall.fancycart.domain.category.CategoryRepository;
 import com.shoppingmall.fancycart.domain.tag.TagRepository;
 import com.shoppingmall.fancycart.service.CategoryService;
-import com.shoppingmall.fancycart.utils.ApiUtils;
 import com.shoppingmall.fancycart.web.dto.CategoryRequestDto;
 import com.shoppingmall.fancycart.web.dto.CategoryResponseDto;
 import com.shoppingmall.fancycart.web.dto.CategoryUpdateRequestDto;
@@ -25,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
+import static com.shoppingmall.fancycart.utils.ApiUtils.API_VERSION;
 import static org.junit.Assert.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -35,7 +35,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class CategoryApiControllerTest {
 
-    private final String API_VERSION = ApiUtils.API_VERSION;
     private final static int UPPR_CAT_LV = 1;
     private final static int LOWER_CAT_LV = 2;
     private final static ResultMatcher STATUS_OK = status().isOk();

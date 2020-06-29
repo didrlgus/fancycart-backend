@@ -7,8 +7,6 @@ import com.shoppingmall.fancycart.domain.tag.Tag;
 import com.shoppingmall.fancycart.domain.tag.TagRepository;
 import com.shoppingmall.fancycart.domain.user.User;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
-import com.shoppingmall.fancycart.utils.ExceptionUtils;
-import com.shoppingmall.fancycart.utils.ApiUtils;
 import com.shoppingmall.fancycart.web.dto.TagRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserProfileResponseDto;
@@ -29,17 +27,18 @@ import org.springframework.web.context.WebApplicationContext;
 import java.util.*;
 
 import static com.shoppingmall.fancycart.auth.AuthUtils.*;
+import static com.shoppingmall.fancycart.utils.ApiUtils.API_VERSION;
 import static org.junit.Assert.assertEquals;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static com.shoppingmall.fancycart.utils.ExceptionUtils.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserApiControllerTest {
 
-    private final String API_VERSION = ApiUtils.API_VERSION;
     private final static ResultMatcher STATUS_OK = status().isOk();
     private final static ResultMatcher STATUS_CLIENT_ERROR = status().is4xxClientError();
     private MockMvc mockMvc;
@@ -87,7 +86,7 @@ public class UserApiControllerTest {
         MvcResult result = callGetProfileAPI(notExistUser, STATUS_CLIENT_ERROR);
 
         String exceptionMessage = result.getResponse().getContentAsString();
-        assertEquals(exceptionMessage, ExceptionUtils.NO_EXIST_USER_MESSAGE);
+        assertEquals(exceptionMessage, NO_EXIST_USER_MESSAGE);
     }
 
     // 프로필 업데이트 테스트
@@ -113,7 +112,7 @@ public class UserApiControllerTest {
         MvcResult result = callUpdateProfileAPI(user, STATUS_CLIENT_ERROR);
 
         String exceptionMessage = result.getResponse().getContentAsString();
-        assertEquals(exceptionMessage, ExceptionUtils.INPUT_EXCEPTION_MESSAGE);
+        assertEquals(exceptionMessage, INPUT_EXCEPTION_MESSAGE);
     }
 
     // 로그아웃 테스트
@@ -157,7 +156,7 @@ public class UserApiControllerTest {
         callAddTagAPI(user, tagRequestDto, STATUS_OK);
         MvcResult result = callAddTagAPI(user, tagRequestDto, STATUS_CLIENT_ERROR);
 
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.DUPLICATED_TAG_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), DUPLICATED_TAG_MESSAGE);
     }
 
     // 태그 10개 초과 시 유효성 테스트
@@ -172,7 +171,7 @@ public class UserApiControllerTest {
             ResultMatcher status = i >= 10 ? STATUS_CLIENT_ERROR : STATUS_OK;
             result = callAddTagAPI(user, tagRequestDto, status);
         }
-        assertEquals(result.getResponse().getContentAsString(), ExceptionUtils.AVAILABLE_TAG_EXCEED_MESSAGE);
+        assertEquals(result.getResponse().getContentAsString(), AVAILABLE_TAG_EXCEED_MESSAGE);
     }
 
     // 유저가 추가한 태그 삭제 테스트

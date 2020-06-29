@@ -3,7 +3,6 @@ package com.shoppingmall.fancycart.service;
 import com.shoppingmall.fancycart.domain.category.Category;
 import com.shoppingmall.fancycart.domain.category.CategoryRepository;
 import com.shoppingmall.fancycart.domain.tag.Tag;
-import com.shoppingmall.fancycart.utils.ExceptionUtils;
 import com.shoppingmall.fancycart.web.dto.CategoryRequestDto;
 import com.shoppingmall.fancycart.web.dto.CategoryResponseDto;
 import com.shoppingmall.fancycart.web.dto.CategoryUpdateRequestDto;
@@ -14,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import static com.shoppingmall.fancycart.utils.ExceptionUtils.*;
 
 @RequiredArgsConstructor
 @Service
@@ -34,7 +35,7 @@ public class CategoryService {
 
     public void updateCategory(Long id, CategoryUpdateRequestDto categoryUpdateRequestDto) {
         Optional<Category> categoryOpt = categoryRepository.findById(id);
-        Category category = categoryOpt.orElseThrow(() -> new NoSuchElementException(ExceptionUtils.NO_EXIST_USER_MESSAGE));
+        Category category = categoryOpt.orElseThrow(() -> new NoSuchElementException(NO_EXIST_USER_MESSAGE));
         category = category.update(categoryUpdateRequestDto.getCatNm(), categoryUpdateRequestDto.getIsAvailable());
         categoryRepository.save(category);
     }
