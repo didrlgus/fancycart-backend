@@ -7,8 +7,6 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
-import static com.shoppingmall.fancycart.utils.ExceptionUtils.INPUT_EXCEPTION_MESSAGE;
-
 @Builder
 @Getter
 public class UserRequestDto {
@@ -18,19 +16,25 @@ public class UserRequestDto {
         @NotBlank
         @Length(max = 50)
         private String name;
+
         @Email
         @Length(max = 50)
         private String email;
+
         @NotBlank
-        @Length(max = 50, message = INPUT_EXCEPTION_MESSAGE)
+        @Length(max = 50)
         private String password;
+
         private Boolean agreeMessageByEmail;
+
         @NotBlank
         @Length(max = 100)
         private String roadAddr;
+
         @NotBlank
         @Length(max = 100)
         private String buildingName;
+
         @NotBlank
         @Length(max = 100)
         private String detailAddr;

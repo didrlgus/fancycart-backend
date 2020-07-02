@@ -24,6 +24,9 @@ public class User extends BaseTimeEntity {
     private String email;
 
     @Column
+    private String password;
+
+    @Column
     private String roadAddr;
 
     @Column
@@ -39,21 +42,18 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role;
 
-    @Column
-    private String token;
-
     @Builder
-    public User(Long id, String name, String email, Role role,
-                String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail, String token) {
+    public User(Long id, String name, String password, String email, Role role,
+                String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail) {
         this.id = id;
         this.name = name;
+        this.password = password;
         this.email = email;
         this.role = role;
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
         this.detailAddr = detailAddr;
         this.agreeMessageByEmail = agreeMessageByEmail;
-        this.token = token;
     }
 
     public User update(String name) {

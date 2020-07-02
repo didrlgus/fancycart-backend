@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,8 +46,14 @@ public class ExceptionRestControllerHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> runtimeExceptionHandler(HttpServletRequest request, ValidCustomException exception) {
-        return new ResponseEntity<>(exception.getErrors()[0].getDefaultMessage(), BAD_REQUEST);
+    @ResponseStatus(BAD_REQUEST)
+    public ErrorResponse runtimeExceptionHandler(ValidCustomException exception) {
+        List<ErrorResponse.FieldError> errors = new ArrayList<>();
+        errors.add(ErrorResponse.FieldError.builder().build());
+
+        return buildFieldErrors(
+                exception.getErrors()[0].getDefaultMessage(),
+                errors);
     }
 
     private ErrorResponse buildFieldErrors(String message, List<ErrorResponse.FieldError> errors) {

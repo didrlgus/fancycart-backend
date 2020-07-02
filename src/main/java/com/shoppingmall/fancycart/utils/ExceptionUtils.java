@@ -12,5 +12,6 @@ public class ExceptionUtils {
     public static final String NO_EXIST_PRODUCT_MESSAGE = "존재하지 않는 상품 입니다.";
     public static final String REVIEW_AUTHORITY_EXCEPTION_MESSAGE = "해당 상품을 구매한 유저만 리뷰를 작성할 수 있습니다.";
     public static final String DUPLICATED_EMAIL_MASSAGE = "이미 사용중인 이메일입니다.";
+    public static final String AUTHENTICATION_EXCEPTION_MESSAGE = "아이디 또는 비밀번호가 적절하지 않습니다.";
 
 }
