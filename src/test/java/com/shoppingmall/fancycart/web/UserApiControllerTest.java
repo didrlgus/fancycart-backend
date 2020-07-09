@@ -1,10 +1,13 @@
 package com.shoppingmall.fancycart.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shoppingmall.fancycart.auth.WithUser;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
 import com.shoppingmall.fancycart.excepaion.ErrorResponse;
 import com.shoppingmall.fancycart.web.dto.AuthenticationRequestDto;
+import com.shoppingmall.fancycart.web.dto.AuthenticationResponseDto;
 import com.shoppingmall.fancycart.web.dto.UserRequestDto;
+import com.shoppingmall.fancycart.web.dto.UserResponseDto;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -121,6 +125,37 @@ public class UserApiControllerTest {
         assertEquals(errorResponse.getMessage(), AUTHENTICATION_EXCEPTION_MESSAGE);
     }
 
+    // 유저 프로필 조회 테스트
+    @Test
+    public void getProfileTest() throws Exception {
+        // 회원 가입
+        UserRequestDto.Post userPostRequestDto = getValidUserPostRequestDto();
+        callAddUserAPI(userPostRequestDto, status().isOk());
+
+        // 로그인
+        AuthenticationRequestDto authenticationRequestDto = getAuthenticationRequestDto(userPostRequestDto);
+        MvcResult result = callAuthenticationAPI(authenticationRequestDto, status().isOk());
+
+        // jwt를 hearder로 넣고 요청
+        ObjectMapper objectMapper = new ObjectMapper();
+        AuthenticationResponseDto authenticationResponseDto
+                = objectMapper.readValue(result.getResponse().getContentAsString(), AuthenticationResponseDto.class);
+
+        callGetProfileAPI(authenticationResponseDto, status().isOk());
+    }
+
+    public MvcResult callGetProfileAPI(AuthenticationResponseDto authenticationResponseDto,
+                                       ResultMatcher status) throws Exception {
+        Long userId = authenticationResponseDto.getId();
+        String token = authenticationResponseDto.getToken();
+
+        return mockMvc.perform(get(API_VERSION + "/user/" + userId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status)
+                .andReturn();
+    }
+
     public MvcResult callAddUserAPI(UserRequestDto.Post requestDto, ResultMatcher status) throws Exception {
         return mockMvc.perform(post(API_VERSION + "/user")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -143,10 +178,6 @@ public class UserApiControllerTest {
                 .name("test")
                 .email("test@gmail.com")
                 .password("1234")
-                .agreeMessageByEmail(true)
-                .roadAddr("정자로")
-                .buildingName("한솔마을")
-                .detailAddr("505-501")
                 .build();
     }
 
@@ -155,10 +186,6 @@ public class UserApiControllerTest {
                 .name("test")
                 .email("test@gmail.com")
                 .password("")
-                .agreeMessageByEmail(true)
-                .roadAddr("정자로")
-                .buildingName("한솔마을")
-                .detailAddr("505-501")
                 .build();
     }
 

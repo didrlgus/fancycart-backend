@@ -2,11 +2,13 @@ package com.shoppingmall.fancycart.domain.user;
 
 import com.shoppingmall.fancycart.domain.BaseTimeEntity;
 
+import com.shoppingmall.fancycart.web.dto.UserResponseDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 
 @Getter
 @NoArgsConstructor
@@ -27,6 +29,9 @@ public class User extends BaseTimeEntity {
     private String password;
 
     @Column
+    private LocalDate birth;
+
+    @Column
     private String roadAddr;
 
     @Column
@@ -43,12 +48,13 @@ public class User extends BaseTimeEntity {
     private Role role;
 
     @Builder
-    public User(Long id, String name, String password, String email, Role role,
+    public User(Long id, String name, String password, String email, LocalDate birth, Role role,
                 String roadAddr, String buildingName, String detailAddr, boolean agreeMessageByEmail) {
         this.id = id;
         this.name = name;
         this.password = password;
         this.email = email;
+        this.birth = birth;
         this.role = role;
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
@@ -75,5 +81,14 @@ public class User extends BaseTimeEntity {
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public UserResponseDto.Profile toProfileResponseDto(User user) {
+        return UserResponseDto.Profile.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .birth(user.getBirth())
+                .agreeMessageByEmail(user.isAgreeMessageByEmail() ? "YES" : "NO")
+                .build();
     }
 }

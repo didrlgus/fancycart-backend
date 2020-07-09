@@ -25,30 +25,11 @@ public class UserRequestDto {
         @Length(max = 50)
         private String password;
 
-        private Boolean agreeMessageByEmail;
-
-        @NotBlank
-        @Length(max = 100)
-        private String roadAddr;
-
-        @NotBlank
-        @Length(max = 100)
-        private String buildingName;
-
-        @NotBlank
-        @Length(max = 100)
-        private String detailAddr;
-
         @Builder
-        public Post(String name, String email, String password, Boolean agreeMessageByEmail,
-                    String roadAddr, String buildingName, String detailAddr) {
+        public Post(String name, String email, String password) {
             this.name = name;
             this.email = email;
             this.password = password;
-            this.agreeMessageByEmail = agreeMessageByEmail;
-            this.roadAddr = roadAddr;
-            this.buildingName = buildingName;
-            this.detailAddr = detailAddr;
         }
     }
 }
