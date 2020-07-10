@@ -16,5 +16,8 @@ public class UserResponseDto {
         private String email;
         private LocalDate birth;
         private String agreeMessageByEmail;
+        private String roadAddr;
+        private String buildingName;
+        private String detailAddr;
     }
 }

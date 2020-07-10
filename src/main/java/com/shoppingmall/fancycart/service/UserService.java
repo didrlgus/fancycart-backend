@@ -33,6 +33,7 @@ public class UserService {
                 .email(userRequestDto.getEmail())
                 .password(passwordEncoder.encode(userRequestDto.getPassword()))
                 .role(Role.USER)
+                .agreeMessageByEmail(false)
                 .build());
     }
 
@@ -48,5 +49,14 @@ public class UserService {
                 .orElseThrow(() -> new NoSuchElementException(NO_EXIST_USER_MESSAGE));
 
         return user.toProfileResponseDto(user);
+    }
+
+    public void updateProfile(Long id, UserRequestDto.Update requestDto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException(NO_EXIST_USER_MESSAGE));
+
+        user = user.updateProfile(requestDto);
+
+        userRepository.save(user);
     }
 }

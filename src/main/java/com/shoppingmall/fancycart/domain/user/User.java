@@ -2,6 +2,7 @@ package com.shoppingmall.fancycart.domain.user;
 
 import com.shoppingmall.fancycart.domain.BaseTimeEntity;
 
+import com.shoppingmall.fancycart.web.dto.UserRequestDto;
 import com.shoppingmall.fancycart.web.dto.UserResponseDto;
 import lombok.Builder;
 import lombok.Getter;
@@ -62,18 +63,12 @@ public class User extends BaseTimeEntity {
         this.agreeMessageByEmail = agreeMessageByEmail;
     }
 
-    public User update(String name) {
-        this.name = name;
-
-        return this;
-    }
-
     public User update(String name, String roadAddr, String buildingName,
                        String detailAddr, boolean agreeMessageByEmail) {
         this.name = name;
         this.roadAddr = roadAddr;
         this.buildingName = buildingName;
-        this. detailAddr = detailAddr;
+        this.detailAddr = detailAddr;
         this.agreeMessageByEmail = agreeMessageByEmail;
 
         return this;
@@ -89,6 +84,20 @@ public class User extends BaseTimeEntity {
                 .email(user.getEmail())
                 .birth(user.getBirth())
                 .agreeMessageByEmail(user.isAgreeMessageByEmail() ? "YES" : "NO")
+                .roadAddr(user.getRoadAddr())
+                .buildingName(user.getBuildingName())
+                .detailAddr(user.getDetailAddr())
                 .build();
+    }
+
+    public User updateProfile(UserRequestDto.Update requestDto) {
+        this.name = requestDto.getName();
+        this.birth = requestDto.getBirth();
+        this.agreeMessageByEmail = requestDto.getAgreeMessageByEmail().equals("YES");
+        this.roadAddr = requestDto.getRoadAddr();
+        this.buildingName = requestDto.getBuildingName();
+        this.detailAddr = requestDto.getDetailAddr();
+
+        return this;
     }
 }
