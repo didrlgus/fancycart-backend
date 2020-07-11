@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shoppingmall.fancycart.domain.user.UserRepository;
 import com.shoppingmall.fancycart.excepaion.ErrorResponse;
 import com.shoppingmall.fancycart.web.dto.AuthenticationRequestDto;
+import com.shoppingmall.fancycart.web.dto.AuthenticationResponseDto;
 import com.shoppingmall.fancycart.web.dto.UserRequestDto;
 import org.junit.After;
 import org.junit.Before;
@@ -121,6 +122,50 @@ public class UserApiControllerTest {
         assertEquals(errorResponse.getMessage(), AUTHENTICATION_EXCEPTION_MESSAGE);
     }
 
+    // 유저 프로필 조회 테스트
+    @Test
+    public void getProfileTest() throws Exception {
+        AuthenticationResponseDto authenticationResponseDto = commonAuthProcess();
+
+        callGetProfileAPI(authenticationResponseDto, status().isOk());
+    }
+
+    // 유저 프로필 수정 테스트
+    @Test
+    public void updateProfileTest() throws Exception {
+        AuthenticationResponseDto authenticationResponseDto = commonAuthProcess();
+
+        UserRequestDto.Update userRequestDto = getUserUpdateRequestDto();
+
+        callUpdateProfileAPI(authenticationResponseDto, userRequestDto, status().isOk());
+    }
+
+    public MvcResult callUpdateProfileAPI(AuthenticationResponseDto authenticationResponseDto,
+                                          UserRequestDto.Update userRequestDto,
+                                          ResultMatcher status) throws Exception {
+        Long userId = authenticationResponseDto.getId();
+        String token = authenticationResponseDto.getToken();
+
+        return mockMvc.perform(put(API_VERSION + "/user/" + userId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON_UTF8)
+                .content(new ObjectMapper().writeValueAsString(userRequestDto)))
+                .andExpect(status)
+                .andReturn();
+    }
+
+    public MvcResult callGetProfileAPI(AuthenticationResponseDto authenticationResponseDto,
+                                       ResultMatcher status) throws Exception {
+        Long userId = authenticationResponseDto.getId();
+        String token = authenticationResponseDto.getToken();
+
+        return mockMvc.perform(get(API_VERSION + "/user/" + userId)
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status)
+                .andReturn();
+    }
+
     public MvcResult callAddUserAPI(UserRequestDto.Post requestDto, ResultMatcher status) throws Exception {
         return mockMvc.perform(post(API_VERSION + "/user")
                 .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -138,15 +183,25 @@ public class UserApiControllerTest {
                 .andReturn();
     }
 
+    public AuthenticationResponseDto commonAuthProcess() throws Exception {
+        // 회원 가입
+        UserRequestDto.Post userPostRequestDto = getValidUserPostRequestDto();
+        callAddUserAPI(userPostRequestDto, status().isOk());
+
+        // 로그인
+        AuthenticationRequestDto authenticationRequestDto = getAuthenticationRequestDto(userPostRequestDto);
+        MvcResult result = callAuthenticationAPI(authenticationRequestDto, status().isOk());
+
+        // jwt를 hearder로 넣고 요청
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.readValue(result.getResponse().getContentAsString(), AuthenticationResponseDto.class);
+    }
+
     public UserRequestDto.Post getValidUserPostRequestDto() {
         return UserRequestDto.Post.builder()
                 .name("test")
                 .email("test@gmail.com")
                 .password("1234")
-                .agreeMessageByEmail(true)
-                .roadAddr("정자로")
-                .buildingName("한솔마을")
-                .detailAddr("505-501")
                 .build();
     }
 
@@ -155,10 +210,6 @@ public class UserApiControllerTest {
                 .name("test")
                 .email("test@gmail.com")
                 .password("")
-                .agreeMessageByEmail(true)
-                .roadAddr("정자로")
-                .buildingName("한솔마을")
-                .detailAddr("505-501")
                 .build();
     }
 
@@ -187,6 +238,16 @@ public class UserApiControllerTest {
         return AuthenticationRequestDto.builder()
                 .email(inValidEmail)
                 .password(userPostRequestDto.getPassword())
+                .build();
+    }
+
+    public UserRequestDto.Update getUserUpdateRequestDto() {
+        return UserRequestDto.Update.builder()
+                .name("update-test")
+                .agreeMessageByEmail("YES")
+                .roadAddr("update-test")
+                .buildingName("update-test")
+                .detailAddr("update-test")
                 .build();
     }
 }
